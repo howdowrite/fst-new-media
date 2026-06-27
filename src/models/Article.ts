@@ -1,11 +1,12 @@
 import {Timestamp} from "firebase/firestore";
 
-interface ArticleProps {
+export interface ArticleProps {
   id: string,
+  creatorId:string,
   title: string,
   content: string,
   tags: string[],
-  status?: 'PUBLISHED' | 'DRAFT',
+  status: 'PUBLISHED' | 'DRAFT',
   imageURL?: string,
   createdAt: Timestamp
 
@@ -22,6 +23,7 @@ export const transform = (id: string, data:Omit<ArticleProps, "id">):ArticleProp
 }
 
 export const createArticle = (data:Partial<ArticleProps>): Partial<ArticleProps> => {
+  if(!data.creatorId) throw new Error(`REQUIRED: creatorId`);
   if(!data.title?.trim()) throw new Error(`REQUIRED: Missing title`);
   if(!data.content?.trim()) throw new Error(`REQUIRED: Missing content`);
 
@@ -30,6 +32,6 @@ export const createArticle = (data:Partial<ArticleProps>): Partial<ArticleProps>
     content: data.content,
     tags: data.tags,
     status: data.status || 'DRAFT',
-    imageURL: data.imageURL,
+    imageURL: data.imageURL || "",
   }
 }
