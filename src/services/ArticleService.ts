@@ -1,4 +1,4 @@
-import {collection, addDoc, getDocs, updateDoc, getDoc, doc} from 'firebase/firestore';
+import {collection, addDoc, getDocs, updateDoc, getDoc, deleteDoc, doc} from 'firebase/firestore';
 import {db} from './firebase';
 import {createArticle, transform} from '../models/Article'
 import type {ArticleProps} from '../models/Article'
@@ -11,8 +11,12 @@ export const createPost = async(data: Partial<ArticleProps>):Promise<void> => {
   try{
     await addDoc(ref, completeArticle);
   }catch(e){
-    throw new Error(`Error ${e}, inserting ${JSON.stringify(completeArticle)}`)
+    throw new Error(`Error ${e}`);
   }
+}
+
+export const deletePost = async(id:string):Promise<void>=>{
+  await deleteDoc(doc(db, "articles", id));
 }
 
 export const updatePostById = async(id: string, data: Partial<ArticleProps>):Promise<void> =>{

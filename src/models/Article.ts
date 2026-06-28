@@ -31,7 +31,7 @@ export const createArticle = (data:Partial<ArticleProps>): Partial<ArticleProps>
   if(!data.content?.trim()) throw new Error(`REQUIRED: Missing content`);
 
   return{
-    creatorId: data.id,
+    creatorId: data.creatorId,
     creatorDisplayName: data.creatorDisplayName,
     title: data.title,
     content: data.content,
@@ -39,6 +39,6 @@ export const createArticle = (data:Partial<ArticleProps>): Partial<ArticleProps>
     status: data.status || 'DRAFT',
     imageURL: data.imageURL || "",
     createdAt: serverTimestamp(),
-    modifiedAt: serverTimestamp()
+    modifiedAt: data?.modifiedAt || serverTimestamp()
   }
 }
