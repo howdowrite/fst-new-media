@@ -3,6 +3,7 @@ import {Timestamp, FieldValue, serverTimestamp} from "firebase/firestore";
 export interface ArticleProps {
   id: string,
   creatorId:string,
+  creatorDisplayName: string,
   title: string,
   content: string,
   tags: string[],
@@ -25,10 +26,13 @@ export const transform = (id: string, data:Omit<ArticleProps, "id">):ArticleProp
 
 export const createArticle = (data:Partial<ArticleProps>): Partial<ArticleProps> => {
   if(!data.creatorId) throw new Error(`REQUIRED: creatorId`);
+  if(!data.creatorDisplayName) throw new Error(`REQUIRED: creatorDisplayName`);
   if(!data.title?.trim()) throw new Error(`REQUIRED: Missing title`);
   if(!data.content?.trim()) throw new Error(`REQUIRED: Missing content`);
 
   return{
+    creatorId: data.id,
+    creatorDisplayName: data.creatorDisplayName,
     title: data.title,
     content: data.content,
     tags: data.tags,
