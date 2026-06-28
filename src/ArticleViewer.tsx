@@ -29,8 +29,12 @@ function ArticleViewer() {
   }, [])
 
   const formatDate = (ts: unknown) => {
-    if (ts && typeof ts === 'object' && 'toDate' in ts && typeof (ts as { toDate: () => Date }).toDate === 'function') {
-      return (ts as { toDate: () => Date }).toDate().toLocaleString()
+    if (!ts) return '—'
+    if (typeof (ts as any)?.toDate === 'function') {
+      return (ts as any).toDate().toLocaleDateString()
+    }
+    if (typeof (ts as any)?.seconds === 'number') {
+      return new Date((ts as any).seconds * 1000).toLocaleDateString()
     }
     return '—'
   }
@@ -39,7 +43,7 @@ function ArticleViewer() {
     const content = commentInputs[articleId]?.trim()
     if (!content || !currentUserId) return
     try {
-      await addComment({ articleId, userId: currentUserId, replyTargetId: articleId, content })
+      await addComment({ articleId, userId: currentUserId, content })
       console.log(`Comment added to article ${articleId}`)
       setCommentInputs(prev => ({ ...prev, [articleId]: '' }))
     } catch (e) {

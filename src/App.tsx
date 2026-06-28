@@ -5,6 +5,9 @@ import NewsPage from "./frontend/NewsPage";
 import ArticlePage from "./frontend/ArticlePage";
 import JournalistDashboard from "./frontend/JournalistDashboard";
 import Drafts from "./frontend/journalist-dashboard/Drafts";
+import Profile from "./frontend/Profile";
+import ProtectedRoute from "./frontend/components/ProtectedRoute";
+import NotFound from "./frontend/components/NotFound";
 import "./App.css";
 import { Link, Routes, Route } from "react-router-dom";
 
@@ -41,10 +44,12 @@ function App() {
       <Route path="/article/:id" element={<ArticlePage />} />
       <Route path="/admin" element={<AdminHome />} />
       <Route path="/add-user" element={<AddUser />} />
-      <Route path="/create-post" element={<CreatePosts />} />
+      <Route path="/create-post" element={<ProtectedRoute><CreatePosts /></ProtectedRoute>} />
       <Route path="/login" element={<Login />} />
-      <Route path="/dashboard" element={<JournalistDashboard />} />
-      <Route path="/drafts" element={<Drafts />} />
+      <Route path="/dashboard" element={<ProtectedRoute><JournalistDashboard /></ProtectedRoute>} />
+      <Route path="/drafts" element={<ProtectedRoute><Drafts /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

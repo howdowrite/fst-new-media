@@ -1,88 +1,157 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import InitialAvatar from "./components/InitialAvatar";
 import { LatestNewsSidebar, NewsPageShell } from "./components/NewsLayout";
-import { ARTICLE_COMMENTS, getArticleById } from "./data/mockArticles";
-import type { Comment } from "./data/mockArticles";
+import { getPostById } from "../services/ArticleService";
+import { getCommentsByArticleId, addComment } from "../services/CommentService";
+import {
+  getCurrentUser,
+  doOnAuthStateChange,
+} from "../services/AuthService";
+import { getUserById } from "../services/UserService";
+import type { ArticleProps } from "../models/Article";
+import type { CommentProps } from "../models/Comment";
 import "./ArticlePage.css";
+
+const formatDate = (ts: unknown) => {
+  if (!ts) return "";
+  if (typeof (ts as any)?.toDate === "function") {
+    return (ts as any).toDate().toLocaleDateString();
+  }
+  if (typeof (ts as any)?.seconds === "number") {
+    return new Date((ts as any).seconds * 1000).toLocaleDateString();
+  }
+  return "";
+};
 
 function CommentItem({
   comment,
   depth = 0,
 }: {
-  comment: Comment;
+  comment: CommentProps & { id: string };
   depth?: number;
 }) {
-  const [repliesHidden, setRepliesHidden] = useState(false);
-  const [replyOpen, setReplyOpen] = useState(false);
-  const hasReplies = comment.replies && comment.replies.length > 0;
-
   return (
     <div className={`comment ${depth > 0 ? "comment--nested" : ""}`}>
       <div className="comment__row">
-        <InitialAvatar name={comment.authorName} />
+        <InitialAvatar name={comment.creatorDisplayName} />
         <div className="comment__content">
           <header className="comment__header">
-            <span className="comment__author">{comment.authorName}</span>
-            <time className="comment__time">{comment.timestamp}</time>
+            <span className="comment__author">
+              {comment.creatorDisplayName}
+            </span>
+            <time className="comment__time">
+              {formatDate(comment.createdAt)}
+            </time>
           </header>
           <p className="comment__text">{comment.content}</p>
-          <div className="comment__actions">
-            <button
-              type="button"
-              className="comment__action"
-              onClick={() => setReplyOpen((prev) => !prev)}
-            >
-              Reply
-            </button>
-            {hasReplies && depth === 0 && (
-              <button
-                type="button"
-                className="comment__action"
-                onClick={() => setRepliesHidden((prev) => !prev)}
-              >
-                {repliesHidden ? "Show replies" : "Hide replies"}
-              </button>
-            )}
-          </div>
-          {replyOpen && <CommentInput placeholder="Reply" authorName="You" />}
         </div>
       </div>
-
-      {hasReplies && !repliesHidden && (
-        <div className="comment__replies">
-          {comment.replies!.map((reply) => (
-            <CommentItem key={reply.id} comment={reply} depth={depth + 1} />
-          ))}
-        </div>
-      )}
     </div>
-  );
-}
-
-function CommentInput({
-  placeholder,
-  authorName,
-}: {
-  placeholder: string;
-  authorName: string;
-}) {
-  return (
-    <form className="comment-input" onSubmit={(e) => e.preventDefault()}>
-      <InitialAvatar name={authorName} size="sm" />
-      <input
-        type="text"
-        className="comment-input__field"
-        placeholder={placeholder}
-        aria-label={placeholder}
-      />
-    </form>
   );
 }
 
 export default function ArticlePage() {
   const { id } = useParams<{ id: string }>();
-  const article = id ? getArticleById(id) : undefined;
+  const [article, setArticle] = useState<ArticleProps | null>(null);
+  const [comments, setComments] = useState<(CommentProps & { id: string })[]>(
+    [],
+  );
+  const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState("");
+  const [currentDisplayName, setCurrentDisplayName] = useState("");
+  const [commentInput, setCommentInput] = useState("");
+  const [commentMsg, setCommentMsg] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [submittingComment, setSubmittingComment] = useState(false);
+
+  useEffect(() => {
+    const unsub = doOnAuthStateChange(async (user) => {
+      if (!user) {
+        setCurrentUserId("");
+        setCurrentDisplayName("");
+        return;
+      }
+      setCurrentUserId(getCurrentUser()?.uid || "");
+      try {
+        const userData = await getUserById(user.uid);
+        setCurrentDisplayName(userData.displayName || "User");
+      } catch {
+        setCurrentDisplayName(getCurrentUser()?.email?.split("@")[0] || "User");
+      }
+    });
+    return () => {
+      if (typeof unsub === "function") unsub();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!id) return;
+    const fetch = async () => {
+      try {
+        const articleData = await getPostById(id);
+        setArticle(articleData);
+        const commentData = await getCommentsByArticleId(id);
+        const mapped = commentData.map(
+          (c) =>
+            ({
+              id: c.id,
+              ...c,
+            }) as CommentProps & { id: string },
+        );
+        setComments(mapped);
+      } catch {
+        setArticle(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetch();
+  }, [id]);
+
+  const handleCommentSubmit = async (
+    e: React.FormEvent<HTMLFormElement>,
+  ) => {
+    e.preventDefault();
+    setCommentMsg(null);
+    if (!commentInput.trim() || !currentUserId || !id) {
+      setCommentMsg({ text: "You must be logged in to comment.", type: "error" });
+      return;
+    }
+    setSubmittingComment(true);
+    try {
+      await addComment({
+        articleId: id,
+        userId: currentUserId,
+        creatorDisplayName: currentDisplayName,
+        content: commentInput.trim(),
+      });
+      setCommentInput("");
+      setCommentMsg({ text: "Comment posted.", type: "success" });
+      const commentData = await getCommentsByArticleId(id);
+      const mapped = commentData.map(
+        (c) =>
+          ({
+            id: c.id,
+            ...c,
+          }) as CommentProps & { id: string },
+      );
+      setComments(mapped);
+    } catch (e) {
+      setCommentMsg({ text: `Failed to post comment: ${e instanceof Error ? e.message : "Unknown error"}`, type: "error" });
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <NewsPageShell>
+        <main className="news-page__main article-page__main">
+          <p className="article-status">Loading...</p>
+        </main>
+      </NewsPageShell>
+    );
+  }
 
   if (!article) {
     return <Navigate to="/" replace />;
@@ -95,26 +164,26 @@ export default function ArticlePage() {
           <div className="article-detail__layout">
             <div className="article-detail__content">
               <span className="article-detail__category">
-                {article.category}
+                {article.tags?.[0] || "GENERAL"}
               </span>
-              <h1 className="article-detail__title">{article.headline}</h1>
+              <h1 className="article-detail__title">{article.title}</h1>
               <footer className="article-detail__meta">
-                <time dateTime="2026-06-27">
-                  {article.date} - {article.time}
-                </time>
+                <time>{formatDate(article.createdAt)}</time>
                 <span className="article-detail__author">
-                  <Link to="#">{article.author}</Link>
+                  <Link to="#">{article.creatorDisplayName}</Link>
                 </span>
               </footer>
             </div>
-            <img
-              className="article-detail__image"
-              src={article.imageUrl}
-              alt=""
-            />
+            {article.imageURL && (
+              <img
+                className="article-detail__image"
+                src={article.imageURL}
+                alt=""
+              />
+            )}
             <div className="article-detail__content">
               <div className="article-detail__body">
-                <p className="article-detail__text">{article.bodyIntro}</p>
+                <p className="article-detail__text">{article.content}</p>
               </div>
             </div>
           </div>
@@ -122,11 +191,43 @@ export default function ArticlePage() {
           <section className="comments" aria-label="Comments">
             <h2 className="comments__title">COMMENTS</h2>
             <div className="comments__list">
-              {ARTICLE_COMMENTS.map((comment) => (
-                <CommentItem key={comment.id} comment={comment} />
-              ))}
+              {comments.length === 0 ? (
+                <p className="article-status">No comments yet.</p>
+              ) : (
+                comments
+                  .filter((c) => !c.replyTargetId || c.replyTargetId === id)
+                  .map((comment) => (
+                    <CommentItem
+                      key={comment.id}
+                      comment={comment}
+                    />
+                  ))
+              )}
             </div>
-            <CommentInput placeholder="Write a comment..." authorName="You" />
+            {commentMsg && (
+              <p className={`auth-form__message auth-form__message--${commentMsg.type}`}>
+                {commentMsg.text}
+              </p>
+            )}
+            <form className="comment-input" onSubmit={handleCommentSubmit}>
+              <InitialAvatar
+                name={currentDisplayName || "?"}
+                size="sm"
+              />
+              <input
+                type="text"
+                className="comment-input__field"
+                placeholder={
+                  currentUserId
+                    ? "Write a comment..."
+                    : "Log in to comment"
+                }
+                aria-label="Write a comment"
+                value={commentInput}
+                onChange={(e) => setCommentInput(e.target.value)}
+                disabled={!currentUserId || submittingComment}
+              />
+            </form>
           </section>
         </article>
 

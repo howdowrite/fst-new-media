@@ -1,7 +1,13 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { LATEST_ARTICLES, NAV_LINKS } from "../data/mockArticles";
 import type { LatestArticle } from "../data/mockArticles";
+import {
+  getCurrentUser,
+  doOnAuthStateChange,
+  logout,
+} from "../../services/AuthService";
 import "../NewsPage.css";
 
 export function TopNav() {
@@ -21,6 +27,26 @@ export function TopNav() {
 }
 
 export function SiteHeader() {
+  const [currentUser, setCurrentUser] = useState("");
+
+  useEffect(() => {
+    const unsub = doOnAuthStateChange(async (user) => {
+      if (!user) {
+        setCurrentUser("");
+        return;
+      }
+      setCurrentUser(getCurrentUser()?.uid || "");
+    });
+    return () => {
+      if (typeof unsub === "function") unsub();
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    setCurrentUser("");
+  };
+
   return (
     <header className="site-header">
       <h1 className="site-header__logo">
@@ -35,12 +61,25 @@ export function SiteHeader() {
         />
       </div>
       <div className="site-header__auth">
-        <button type="button" className="auth-btn auth-btn--register">
-          Register
-        </button>
-        <button type="button" className="auth-btn auth-btn--login">
-          Login
-        </button>
+        {currentUser ? (
+          <>
+            <Link to="/dashboard" className="auth-btn auth-btn--register">
+              Dashboard
+            </Link>
+            <span className="auth-btn auth-btn--login" onClick={handleLogout}>
+              Log Out
+            </span>
+          </>
+        ) : (
+          <>
+            <Link to="/add-user" className="auth-btn auth-btn--register">
+              Register
+            </Link>
+            <Link to="/login" className="auth-btn auth-btn--login">
+              Login
+            </Link>
+          </>
+        )}
       </div>
     </header>
   );

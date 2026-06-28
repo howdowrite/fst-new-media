@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { doOnAuthStateChange } from "../services/AuthService";
 import { getUserById } from "../services/UserService";
+import { getAllPosts } from "../services/ArticleService";
+import type { ArticleProps } from "../models/Article";
 import "./css/JournalistDashboard.css";
 import {
   House,
@@ -16,44 +18,29 @@ function JournalistDashboard() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState("");
-
-  const stories = [
-    {
-      id: 1,
-      title: "Turkey vs. USA Sports Lorem Ipsum Lorem Ipsum",
-      excerpt:
-        "Lorem Ipsum two countries fighting over sports i guess lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lore..",
-      lastUpdated: "28/6/26",
-      status: "PUBLISHED",
-    },
-    {
-      id: 2,
-      title: "Turkey vs. USA Sports Lorem Ipsum Lorem Ipsum",
-      excerpt:
-        "Lorem Ipsum two countries fighting over sports i guess lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lore..",
-      lastUpdated: "28/6/26",
-      status: "DRAFT",
-    },
-  ];
+  const [currentUserId, setCurrentUserId] = useState("");
+  const [stories, setStories] = useState<ArticleProps[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Authentication tracking listener
     const unsub = doOnAuthStateChange(async (user) => {
       if (!user) {
         setCurrentUser("");
+        setCurrentUserId("");
         return;
       }
-      const userData = await getUserById(user.uid);
+      const uid = user.uid;
+      setCurrentUserId(uid);
+      const userData = await getUserById(uid);
       setCurrentUser(userData.displayName || "User");
     });
 
-    // 2. Responsive viewport tracking layout manager
     const handleResize = () => {
       if (window.innerWidth <= 1024) {
         setIsCollapsed(true);
       } else {
         setIsCollapsed(false);
-        setIsMobileMenuOpen(false); // Clean up open menus if dragging window larger
+        setIsMobileMenuOpen(false);
       }
     };
 
@@ -65,6 +52,24 @@ function JournalistDashboard() {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+  useEffect(() => {
+    if (!currentUserId) return;
+    const fetch = async () => {
+      try {
+        const data = await getAllPosts();
+        const userPosts = (data as ArticleProps[]).filter(
+          (a) => a.creatorId === currentUserId,
+        );
+        setStories(userPosts);
+      } catch {
+        setStories([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetch();
+  }, [currentUserId]);
 
   return (
     <div className="dashboard-page">
@@ -142,25 +147,35 @@ function JournalistDashboard() {
           <h2 className="feed-section-title">MOST RECENT</h2>
 
           <div className="stories-feed">
-            {stories.map((story) => (
-              <div key={story.id} className="story-card">
-                <div className="story-card__content">
-                  <h3 className="story-card__title">{story.title}</h3>
-                  <p className="story-card__excerpt">{story.excerpt}</p>
-                </div>
+            {loading ? (
+              <p className="article-status">Loading...</p>
+            ) : stories.length === 0 ? (
+              <p className="article-status">No stories yet.</p>
+            ) : (
+              stories.map((story) => (
+                <div key={story.id} className="story-card">
+                  <div className="story-card__content">
+                    <h3 className="story-card__title">{story.title}</h3>
+                    <p className="story-card__excerpt">{story.content}</p>
+                  </div>
 
-                <div className="story-card__meta">
-                  <span className="story-card__date">
-                    LAST UPDATED: {story.lastUpdated}
-                  </span>
-                  <span
-                    className={`story-card__tag story-card__tag--${story.status.toLowerCase()}`}
-                  >
-                    {story.status}
-                  </span>
+                  <div className="story-card__meta">
+                    <span className="story-card__date">
+                      LAST UPDATED: {story.modifiedAt
+                        ? (typeof story.modifiedAt === "object" && "toDate" in story.modifiedAt
+                          ? (story.modifiedAt as { toDate: () => Date }).toDate().toLocaleDateString()
+                          : "")
+                        : ""}
+                    </span>
+                    <span
+                      className={`story-card__tag story-card__tag--${story.status.toLowerCase()}`}
+                    >
+                      {story.status}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </main>
       </div>

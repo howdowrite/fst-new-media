@@ -1,11 +1,12 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { Link } from "react-router-dom";
-import { createPost } from "../../services/ArticleService";
+import { getAllPosts, deletePost, updatePostById } from "../../services/ArticleService";
 import {
   getCurrentUser,
   doOnAuthStateChange,
 } from "../../services/AuthService";
 import { getUserById } from "../../services/UserService";
+import type { ArticleProps } from "../../models/Article";
 import "../css/JournalistDashboard.css";
 import {
   House,
@@ -17,42 +18,16 @@ import {
   X,
 } from "lucide-react";
 
-interface DraftArticle {
-  id: number;
-  title: string;
-  content: string;
-  category: string;
-  lastUpdated: string;
-  status: "DRAFT";
-}
-
 function Drafts() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState("");
   const [currentUserId, setCurrentUserId] = useState("");
 
-  const [draftsList, setDraftsList] = useState<DraftArticle[]>([
-    {
-      id: 1,
-      title: "Celebrity Lifestyle Lorem Ipsum Lorem Ipsum",
-      content: "a",
-      category: "celebrity",
-      lastUpdated: "28/6/26",
-      status: "DRAFT",
-    },
-    {
-      id: 2,
-      title: "Turkey vs. USA Sports Lorem Ipsum Lorem Ipsum",
-      content:
-        "Lorem Ipsum two countries fighting over sports i guess lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lore..",
-      category: "sports",
-      lastUpdated: "28/6/26",
-      status: "DRAFT",
-    },
-  ]);
+  const [draftsList, setDraftsList] = useState<ArticleProps[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [activeDraft, setActiveDraft] = useState<DraftArticle | null>(null);
+  const [activeDraft, setActiveDraft] = useState<ArticleProps | null>(null);
 
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
@@ -68,7 +43,6 @@ function Drafts() {
   ];
 
   useEffect(() => {
-    // 1. Authentication lifecycle sub
     const unsub = doOnAuthStateChange(async (user) => {
       if (!user) {
         setCurrentUser("");
@@ -80,13 +54,12 @@ function Drafts() {
       setCurrentUser(userData.displayName || "User");
     });
 
-    // 2. Automated responsive layout sync
     const handleResize = () => {
       if (window.innerWidth <= 1024) {
         setIsCollapsed(true);
       } else {
         setIsCollapsed(false);
-        setIsMobileMenuOpen(false); // Clean drawer states if scaling up window width
+        setIsMobileMenuOpen(false);
       }
     };
 
@@ -99,11 +72,29 @@ function Drafts() {
     };
   }, []);
 
-  const handleSelectDraft = (draft: DraftArticle) => {
+  useEffect(() => {
+    if (!currentUserId) return;
+    const fetch = async () => {
+      try {
+        const data = await getAllPosts();
+        const drafts = (data as ArticleProps[]).filter(
+          (a) => a.creatorId === currentUserId && a.status === "DRAFT",
+        );
+        setDraftsList(drafts);
+      } catch {
+        setDraftsList([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetch();
+  }, [currentUserId]);
+
+  const handleSelectDraft = (draft: ArticleProps) => {
     setActiveDraft(draft);
     setEditTitle(draft.title);
     setEditContent(draft.content);
-    setEditCategory(draft.category);
+    setEditCategory(draft.tags?.[0] || "");
   };
 
   const handleReturnToFeed = () => {
@@ -119,33 +110,25 @@ function Drafts() {
 
     try {
       if (action === "DELETE") {
+        await deletePost(activeDraft.id);
         setDraftsList((prev) =>
           prev.filter((item) => item.id !== activeDraft.id),
-        );
-        console.log(
-          `Successfully deleted draft tracking index: ${activeDraft.id}`,
         );
       } else {
         const finalStatus = action === "PUBLISH" ? "PUBLISHED" : "DRAFT";
 
-        await createPost({
-          creatorId: currentUserId || "temporary-dev-id",
+        await updatePostById(activeDraft.id, {
           title: editTitle,
           content: editContent,
           tags: editCategory ? [editCategory] : [],
           status: finalStatus,
-        });
+          creatorDisplayName: currentUser,
+        } as Partial<ArticleProps>);
 
         setDraftsList((prev) =>
           prev.map((item) =>
             item.id === activeDraft.id
-              ? {
-                  ...item,
-                  title: editTitle,
-                  content: editContent,
-                  category: editCategory,
-                  lastUpdated: "28/6/26",
-                }
+              ? { ...item, title: editTitle, content: editContent, tags: editCategory ? [editCategory] : [], status: finalStatus }
               : item,
           ),
         );
@@ -155,21 +138,16 @@ function Drafts() {
             prev.filter((item) => item.id !== activeDraft.id),
           );
         }
-
-        console.log(
-          `Success handling draft dispatch payload action marked: ${action}`,
-        );
       }
 
       handleReturnToFeed();
     } catch (err) {
-      console.error(`Error processing transactional layout actions: ${err}`);
+      console.error(`Error processing action: ${err}`);
     }
   };
 
   return (
     <div className="dashboard-page">
-      {/* BRANDING HEADER - Interchanges layout setups between desktop and mobile query constraints */}
       <header className="dashboard-header-block">
         <p className="header-text">WebsiteName</p>
         <button
@@ -186,7 +164,6 @@ function Drafts() {
           isMobileMenuOpen ? "dashboard-container--mobile-open" : ""
         }`}
       >
-        {/* SIDEBAR PANEL */}
         <aside className="dashboard-panel dashboard-panel--sidebar">
           <div className="sidebar__header">
             <button
@@ -234,7 +211,6 @@ function Drafts() {
           </nav>
         </aside>
 
-        {/* WORKSPACE CONTENT SURFACE */}
         <main className="dashboard-panel dashboard-panel--main">
           {activeDraft ? (
             <div className="draft-editor-wrapper">
@@ -381,16 +357,10 @@ function Drafts() {
             <div className="draft-feed-wrapper">
               <h2 className="feed-section-title">Saved Drafts</h2>
 
-              {draftsList.length === 0 ? (
-                <p
-                  style={{
-                    fontFamily: "var(--body, sans-serif)",
-                    color: "#777",
-                    paddingLeft: "8px",
-                  }}
-                >
-                  No remaining drafts saved.
-                </p>
+              {loading ? (
+                <p className="article-status">Loading...</p>
+              ) : draftsList.length === 0 ? (
+                <p className="article-status">No drafts saved.</p>
               ) : (
                 <div className="stories-feed">
                   {draftsList.map((draft) => (
@@ -405,15 +375,10 @@ function Drafts() {
                       </div>
 
                       <div className="story-card__meta">
-                        <span className="story-card__date">
-                          LAST UPDATED: {draft.lastUpdated}
-                        </span>
-
                         <div className="story-card__indicator-group">
                           <span className="story-card__tag story-card__tag--draft">
-                            {draft.status}
+                            DRAFT
                           </span>
-
                           <span className="story-card__edit-hint-icon">
                             <SquarePen size={14} strokeWidth={2} />
                           </span>

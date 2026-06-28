@@ -1,23 +1,42 @@
-import { useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, type FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { setUser } from "../services/UserService";
+import { getCurrentUser } from "../services/AuthService";
 import "./css/Login.css";
 
 function AddUser() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (getCurrentUser()) {
+      navigate("/");
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setMessage(null);
+    setSubmitting(true);
     try {
-      const id = await setUser(
+      await setUser(
         { email: email, displayName: displayName },
         password,
       );
-      console.log(`Success created user of ${id}`);
+      setEmail("");
+      setPassword("");
+      setDisplayName("");
+      setMessage({ text: "Account created successfully!", type: "success" });
+      setTimeout(() => navigate("/"), 1500);
     } catch (e) {
-      console.error(`Error: ${e}`);
+      const errMsg = e instanceof Error ? e.message : "Registration failed";
+      setMessage({ text: errMsg, type: "error" });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -58,6 +77,12 @@ function AddUser() {
           <h1 className="auth-form__title">Register</h1>
           <p className="auth-form__subtitle">Create Your Account</p>
 
+          {message && (
+            <p className={`auth-form__message auth-form__message--${message.type}`}>
+              {message.text}
+            </p>
+          )}
+
           <form onSubmit={handleSubmit}>
             <div className="auth-field">
               <label htmlFor="displayName">display name: </label>
@@ -68,6 +93,7 @@ function AddUser() {
                 onChange={(e) => setDisplayName(e.target.value)}
                 autoComplete="name"
                 required
+                disabled={submitting}
               />
             </div>
 
@@ -80,6 +106,7 @@ function AddUser() {
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 required
+                disabled={submitting}
               />
             </div>
 
@@ -92,11 +119,12 @@ function AddUser() {
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="new-password"
                 required
+                disabled={submitting}
               />
             </div>
 
-            <button type="submit" className="auth-form__submit">
-              Submit
+            <button type="submit" className="auth-form__submit" disabled={submitting}>
+              {submitting ? "Submitting..." : "Submit"}
             </button>
           </form>
 

@@ -73,6 +73,7 @@ function CreatePosts() {
     try {
       await createPost({
         creatorId: currentUserId || "temporary-dev-id",
+        creatorDisplayName: currentUser,
         title: title,
         content: content,
         tags: category ? [category] : [],

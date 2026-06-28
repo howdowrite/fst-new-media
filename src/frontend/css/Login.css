@@ -154,6 +154,24 @@
   cursor: not-allowed;
 }
 
+.auth-form__message {
+  font-family: var(--body);
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border-radius: 4px;
+}
+
+.auth-form__message--success {
+  background: #e6f7e6;
+  color: #1a7d1a;
+}
+
+.auth-form__message--error {
+  background: #fde8e8;
+  color: #c41e1e;
+}
+
 .auth-form__submit {
   display: block;
   margin-top: 12px;
@@ -170,6 +188,11 @@
 
 .auth-form__submit:hover {
   opacity: 0.85;
+}
+
+.auth-form__submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .auth-form__footer {

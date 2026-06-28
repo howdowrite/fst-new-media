@@ -1,5 +1,5 @@
 import { useState, useEffect, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   login,
   getCurrentUser,
@@ -13,6 +13,7 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [currentUser, setCurrentUser] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsub = doOnAuthStateChange(async (user) => {
@@ -22,18 +23,20 @@ function Login() {
       }
       const userData = await getUserById(user.uid);
       setCurrentUser(userData.displayName || "");
+      navigate("/");
     });
     return () => {
       if (typeof unsub === "function") unsub();
     };
-  }, []);
+  }, [navigate]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
       await login(email, password);
       console.log(`Success welcome ${getCurrentUser()?.uid}`);
-    } catch (e) {
+      navigate("/");
+    } catch {
       alert(`Invalid Username or Password`);
     }
   };

@@ -5,7 +5,7 @@ import type {CommentProps} from '../models/Comment'
 
 const ref = collection(db, "comments")
 
-export const addComment = async (data: CommentProps) => {
+export const addComment = async (data: Partial<CommentProps>) => {
   const complete = createComment(data);
   await addDoc(ref, complete);
 }

@@ -102,12 +102,18 @@
 
 .site-header__auth {
   display: inline-flex;
+  align-items: stretch;
   border-radius: 999px;
   overflow: hidden;
   border: 1px solid var(--text);
   padding: 0;
   margin: 0;
   background: #ffffff;
+}
+
+.site-header__auth .auth-btn {
+  display: flex;
+  align-items: center;
 }
 
 .auth-btn {
@@ -119,6 +125,8 @@
   white-space: nowrap;
   transition: opacity 0.15s;
   line-height: 1;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .auth-btn:hover {
@@ -171,6 +179,7 @@
 .featured-article__body {
   display: flex;
   flex-direction: column;
+  gap: 0.4rem;
 }
 
 .featured-article__category {

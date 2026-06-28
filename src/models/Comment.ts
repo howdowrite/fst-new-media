@@ -31,8 +31,8 @@ export const createComment = (data:Partial<CommentProps>): Partial<CommentProps>
   return{
     articleId: data.articleId,
     userId: data.userId,
-    creatorDisplayName: data.creatorDisplayName,
-    replyTargetId: data.replyTargetId,
+    creatorDisplayName: data.creatorDisplayName || "",
+    replyTargetId: data.replyTargetId || "", 
     content: data.content,
     modifiedAt: serverTimestamp(),
     createdAt: serverTimestamp()

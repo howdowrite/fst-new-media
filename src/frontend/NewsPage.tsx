@@ -1,33 +1,49 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   LatestNewsSidebar,
   NewsPageShell,
 } from "./components/NewsLayout";
-import { FEATURED_ARTICLES } from "./data/mockArticles";
-import type { FeaturedArticle } from "./data/mockArticles";
+import { getAllPosts } from "../services/ArticleService";
+import type { ArticleProps } from "../models/Article";
 import "./NewsPage.css";
 
-function FeaturedArticleCard({ article }: { article: FeaturedArticle }) {
+const formatDate = (ts: unknown) => {
+  if (!ts) return "";
+  if (typeof (ts as any)?.toDate === "function") {
+    return (ts as any).toDate().toLocaleDateString();
+  }
+  if (typeof (ts as any)?.seconds === "number") {
+    return new Date((ts as any).seconds * 1000).toLocaleDateString();
+  }
+  return "";
+};
+
+function FeaturedArticleCard({ article }: { article: ArticleProps }) {
   return (
     <article className="featured-article">
       <Link to={`/article/${article.id}`}>
-        <img
-          className="featured-article__image"
-          src={article.imageUrl}
-          alt=""
-          loading="lazy"
-        />
+        {article.imageURL && (
+          <img
+            className="featured-article__image"
+            src={article.imageURL}
+            alt=""
+            loading="lazy"
+          />
+        )}
       </Link>
       <div className="featured-article__body">
-        <span className="featured-article__category">{article.category}</span>
+        <span className="featured-article__category">
+          {article.tags?.[0] || "GENERAL"}
+        </span>
         <h2 className="featured-article__headline">
-          <Link to={`/article/${article.id}`}>{article.headline}</Link>
+          <Link to={`/article/${article.id}`}>{article.title}</Link>
         </h2>
-        <p className="featured-article__snippet">{article.snippet}</p>
+        <p className="featured-article__snippet">{article.content}</p>
         <footer className="featured-article__footer">
-          <time dateTime="2026-06-06">{article.date}</time>
+          <time>{formatDate(article.createdAt)}</time>
           <span className="featured-article__author">
-            by <a href="#">{article.author}</a>
+            by {article.creatorDisplayName || article.creatorId.slice(0, 8)}
           </span>
         </footer>
       </div>
@@ -36,13 +52,39 @@ function FeaturedArticleCard({ article }: { article: FeaturedArticle }) {
 }
 
 export default function NewsPage() {
+  const [articles, setArticles] = useState<ArticleProps[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const data = await getAllPosts();
+        const published = (data as ArticleProps[]).filter(
+          (a) => a.status === "PUBLISHED"
+        );
+        setArticles(published);
+      } catch {
+        setArticles([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetch();
+  }, []);
+
   return (
     <NewsPageShell>
       <main className="news-page__main">
         <section className="featured-section" aria-label="Featured articles">
-          {FEATURED_ARTICLES.map((article) => (
-            <FeaturedArticleCard key={article.id} article={article} />
-          ))}
+          {loading ? (
+            <p className="article-status">Loading...</p>
+          ) : articles.length === 0 ? (
+            <p className="article-status">No articles yet.</p>
+          ) : (
+            articles.map((article) => (
+              <FeaturedArticleCard key={article.id} article={article} />
+            ))
+          )}
         </section>
         <LatestNewsSidebar />
       </main>
