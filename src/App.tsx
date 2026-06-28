@@ -1,10 +1,11 @@
 import AddUser from "./frontend/AddUser";
 import CreatePosts from "./frontend/CreatePosts";
 import Login from "./frontend/Login";
+import NewsPage from "./frontend/NewsPage";
 import "./App.css";
 import { Link, Routes, Route } from "react-router-dom";
 
-function Home() {
+function AdminHome() {
   return (
     <>
       <h1>BACKEND TESTING</h1>
@@ -29,19 +30,13 @@ function Home() {
 
 function App() {
   return (
-    <>
-      <nav>
-        <Link to="/">Home</Link>{" "}
-      </nav>
-      <main>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/add-user" element={<AddUser />} />
-          <Route path="/create-post" element={<CreatePosts />} />
-          <Route path="/login" element={<Login />} />
-        </Routes>
-      </main>
-    </>
+    <Routes>
+      <Route path="/" element={<NewsPage />} />
+      <Route path="/admin" element={<AdminHome />} />
+      <Route path="/add-user" element={<AddUser />} />
+      <Route path="/create-post" element={<CreatePosts />} />
+      <Route path="/login" element={<Login />} />
+    </Routes>
   );
 }
 

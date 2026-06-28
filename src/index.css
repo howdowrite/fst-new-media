@@ -1,10 +1,12 @@
 :root {
   --subtext: #363636;
   --text: #000000;
+  --text-h: #000000;
   --bg: #f0f0f0;
+  --border: #e0e0e0;
   --accent: #fe0000;
   --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+    rgba(0, 0, 0, 0.034) 0 10px 15px -3px, rgba(0, 0, 0, 0.034) 0 4px 6px -2px;
 
   --body: "Inria Serif";
   --heading: "Instrument Serif";
@@ -25,7 +27,7 @@
 }
 
 #root {
-  width: 1126px;
+  width: 1426px;
   max-width: 100%;
   margin: 0 auto;
   text-align: center;
