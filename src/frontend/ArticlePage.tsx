@@ -94,8 +94,8 @@ export default function ArticlePage() {
         const mapped = commentData.map(
           (c) =>
             ({
-              id: c.id,
               ...c,
+              id: c.id,
             }) as CommentProps & { id: string },
         );
         setComments(mapped);
@@ -131,8 +131,8 @@ export default function ArticlePage() {
       const mapped = commentData.map(
         (c) =>
           ({
-            id: c.id,
             ...c,
+            id: c.id,
           }) as CommentProps & { id: string },
       );
       setComments(mapped);
