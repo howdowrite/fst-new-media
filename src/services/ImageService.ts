@@ -10,8 +10,8 @@ export const validateImage = (file: File) => {
 
 export const compressImage = async(file: File) => {
   return imageCompression(file, {
-    maxSizeMB: 0.1,
-    maxWidthOrHeight: 300,
+    maxSizeMB: 1.5,
+    maxWidthOrHeight: 1024,
     useWebWorker: true,
     fileType: "image/jpeg"
    })

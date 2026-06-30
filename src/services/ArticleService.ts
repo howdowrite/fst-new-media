@@ -31,5 +31,5 @@ export const getPostById = async(id: string):Promise<ArticleProps> => {
 
 export const getAllPosts = async() => {
   const snapshot =  await getDocs(ref);
-  return snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+  return snapshot.docs.map(doc => transform(doc.id, {...doc.data() as ArticleProps}));
 }
