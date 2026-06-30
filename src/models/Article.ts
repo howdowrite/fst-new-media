@@ -1,5 +1,8 @@
 import {Timestamp, FieldValue, serverTimestamp} from "firebase/firestore";
 
+const TITLE_MAX = 50;
+const CONTENT_MAX = 1000;
+
 export interface ArticleProps {
   id: string,
   creatorId:string,
@@ -24,25 +27,13 @@ export const transform = (id: string, data:Omit<ArticleProps, "id">):ArticleProp
   }
 }
 
-export const updateArticle = (data: Partial<ArticleProps>): Partial<ArticleProps> => {
-  if(!data.title?.trim()) throw new Error(`REQUIRED: Missing title`);
-  if(!data.content?.trim()) throw new Error(`REQUIRED: Missing content`);
-
-  return{
-    title: data.title,
-    content: data.content,
-    tags: data.tags,
-    status: data.status || 'DRAFT',
-    imageURL: data.imageURL || "",
-    modifiedAt: serverTimestamp()
-  }
-}
-
-export const createArticle = (data:Partial<ArticleProps>): Partial<ArticleProps> => {
-  if(!data.creatorId) throw new Error(`REQUIRED: creatorId`);
+export const validateArticle = (data:Partial<ArticleProps>): Partial<ArticleProps> => {
   if(!data.creatorDisplayName) throw new Error(`REQUIRED: creatorDisplayName`);
   if(!data.title?.trim()) throw new Error(`REQUIRED: Missing title`);
   if(!data.content?.trim()) throw new Error(`REQUIRED: Missing content`);
+
+  if(data.title.length <= TITLE_MAX) throw new Error(`Title too long please limit to ${TITLE_MAX} characters`)
+  if(data.content.length <= CONTENT_MAX) throw new Error(`Title too long please limit to ${CONTENT_MAX} characters`)
 
   return{
     creatorId: data.creatorId,
@@ -51,8 +42,8 @@ export const createArticle = (data:Partial<ArticleProps>): Partial<ArticleProps>
     content: data.content,
     tags: data.tags,
     status: data.status || 'DRAFT',
-    imageURL: data.imageURL || "",
-    createdAt: serverTimestamp(),
-    modifiedAt: data?.modifiedAt || serverTimestamp()
+    imageURL: data.imageURL,
+    createdAt: data.createdAt || serverTimestamp(),
+    modifiedAt: serverTimestamp()
   }
 }

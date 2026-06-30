@@ -1,12 +1,12 @@
 import {collection, addDoc, getDocs, updateDoc, getDoc, deleteDoc, doc} from 'firebase/firestore';
 import {db} from './firebase';
-import {createArticle, updateArticle, transform} from '../models/Article'
+import {validateArticle, transform} from '../models/Article'
 import type {ArticleProps} from '../models/Article'
 
 const ref = collection(db, "articles");
 
 export const createPost = async(data: Partial<ArticleProps>):Promise<void> => {
-  const completeArticle = createArticle({...data});
+  const completeArticle = validateArticle({...data});
 
   try{
     await addDoc(ref, completeArticle);
@@ -20,7 +20,7 @@ export const deletePost = async(id:string):Promise<void>=>{
 }
 
 export const updatePostById = async(id: string, data: Partial<ArticleProps>):Promise<void> =>{
-  const validate = updateArticle(data);
+  const validate = validateArticle(data);
   await updateDoc(doc(db,"articles", id), {...validate});
 }
 

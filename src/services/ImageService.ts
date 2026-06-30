@@ -17,7 +17,7 @@ export const compressImage = async(file: File) => {
    })
 }
 
-export const uploadToCloudinary = async (file: File): Promise<string> =>  {
+const uploadToCloudinary = async (file: File): Promise<string> =>  {
   const formData = new FormData();
 
   formData.append("file", file);

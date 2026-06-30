@@ -1,4 +1,4 @@
-import { useState, useEffect, type ChangeEvent, type FormEvent} from "react";
+import { useState, useEffect, type ChangeEvent, type FormEvent, useRef} from "react";
 import { Link } from "react-router-dom";
 import { createPost } from "../../services/ArticleService";
 import {
@@ -15,7 +15,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { uploadThumbnail } from "../../services/ImageService";
+import { compressImage, uploadThumbnail } from "../../services/ImageService";
 
 function CreatePosts() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -28,9 +28,19 @@ function CreatePosts() {
   const [image, setImage] = useState<File | null>(null)
   const [category, setCategory] = useState("");
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if(e.target.files && e.target.files.length > 0)
-      setImage(e.target.files[0]);
+  const [preview, setPreview] = useState("");
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFileChange = async(e: ChangeEvent<HTMLInputElement>) => {
+    if(e.target.files && e.target.files.length > 0){
+      const file = e.target.files[0];
+      const compressed = await compressImage(file);
+      const fileURL = URL.createObjectURL(compressed);
+
+      setImage(file);
+      setPreview(fileURL);
+    }
   }
 
   const categories = [
@@ -97,6 +107,7 @@ function CreatePosts() {
       setContent("");
       setCategory("");
       setImage(null);
+      if(fileInputRef.current) fileInputRef.current.value = "";
       setIsMobileMenuOpen(false);
     } catch (e) {
       console.error(`Error processing post operations: ${e}`);
@@ -223,10 +234,11 @@ function CreatePosts() {
               <input
                 id="image"
                 type="file"
+                ref={fileInputRef}
                 onChange={handleFileChange}
                 disabled={!currentUserId}
               />
-              {image && <p>Selected: {image.name}</p>}
+              { preview && <img src={preview} alt="" /> }
               </div>
 
             <div className="auth-field">

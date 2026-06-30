@@ -1,4 +1,4 @@
-import { useState, useEffect, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent, type ChangeEvent, useRef } from "react";
 import { Link } from "react-router-dom";
 import { getAllPosts, deletePost, updatePostById } from "../../services/ArticleService";
 import {
@@ -6,6 +6,7 @@ import {
   doOnAuthStateChange,
 } from "../../services/AuthService";
 import { getUserById } from "../../services/UserService";
+import {compressImage, uploadThumbnail} from "../../services/ImageService";
 import type { ArticleProps } from "../../models/Article";
 import "../css/JournalistDashboard.css";
 import {
@@ -31,7 +32,12 @@ function Drafts() {
 
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
+  const [editImage, setEditImage] = useState<File | null>(null);
+  const [editImageUrl, setEditImageUrl] = useState("");
   const [editCategory, setEditCategory] = useState("");
+
+  const [preview, setPreview] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const categories = [
     "celebrity",
@@ -90,10 +96,13 @@ function Drafts() {
     fetch();
   }, [currentUserId]);
 
-  const handleSelectDraft = (draft: ArticleProps) => {
+  const handleSelectDraft = async(draft: ArticleProps) => {
     setActiveDraft(draft);
     setEditTitle(draft.title);
     setEditContent(draft.content);
+    setEditImageUrl(draft.imageURL);
+    setEditImage(null);
+    setPreview(draft.imageURL);
     setEditCategory(draft.tags?.[0] || "");
   };
 
@@ -117,18 +126,25 @@ function Drafts() {
       } else {
         const finalStatus = action === "PUBLISH" ? "PUBLISHED" : "DRAFT";
 
+        let imageUrl = "";
+        if(editImage){
+          imageUrl = await uploadThumbnail(editImage);
+        }
+
         await updatePostById(activeDraft.id, {
           title: editTitle,
           content: editContent,
           tags: editCategory ? [editCategory] : [],
           status: finalStatus,
           creatorDisplayName: currentUser,
+          creatorId: currentUserId,
+          imageURL: imageUrl || editImageUrl,
         } as Partial<ArticleProps>);
 
         setDraftsList((prev) =>
           prev.map((item) =>
             item.id === activeDraft.id
-              ? { ...item, title: editTitle, content: editContent, tags: editCategory ? [editCategory] : [], status: finalStatus }
+              ? { ...item, title: editTitle, content: editContent, imageURL: editImageUrl, tags: editCategory ? [editCategory] : [], status: finalStatus }
               : item,
           ),
         );
@@ -146,6 +162,16 @@ function Drafts() {
     }
   };
 
+  const handleFileChange = async(e: ChangeEvent<HTMLInputElement>) => {
+    if(e.target.files && e.target.files.length > 0){
+      const file = e.target.files[0];
+      const compressed = await compressImage(file);
+      const fileURL = URL.createObjectURL(compressed);
+
+      setEditImage(file);
+      setPreview(fileURL);
+    }
+  }
   return (
     <div className="dashboard-page">
       <header className="dashboard-header-block">
@@ -289,7 +315,19 @@ function Drafts() {
                 </div>
 
                 <div className="auth-field">
-                  <label htmlFor="edit-category">category: </label>
+                  <label htmlFor="image">Image:</label>
+                  <input
+                    id="image"
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    disabled={!currentUserId}
+                  />
+                  { preview && <img src={preview} alt="" /> }
+                </div>
+
+                <div className="auth-field">
+                  <label htmlFor="edit-category">category test: </label>
                   <select
                     id="edit-category"
                     value={editCategory}
