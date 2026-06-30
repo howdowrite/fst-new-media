@@ -22,11 +22,14 @@ export const transform = (id: string, data:Omit<CommentProps, "id">):CommentProp
   }
 }
 
+const CONTENT_MAX = 500;
+
 export const validateComment = (data:Partial<CommentProps>): Partial<CommentProps> => {
   if(!data.articleId) throw new Error(`REQUIRED: Missing articleId`);
   if(!data.userId) throw new Error(`REQUIRED: Missing UserId`);
   if(!data.creatorDisplayName) throw new Error(`REQUIRED: creatorDisplayName`);
   if(!data.content?.trim()) throw new Error(`REQUIRED: Missing content`);
+  if(data.content.length >= CONTENT_MAX) throw new Error(`Comment too long, please limit to ${CONTENT_MAX} characters`);
 
   return{
     articleId: data.articleId,

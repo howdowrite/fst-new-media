@@ -76,7 +76,9 @@ export default function NewsPage() {
   }, []);
 
   const filteredArticles = categoryFilter
-    ? articles.filter((a) => a.tags?.includes(categoryFilter))
+    ? articles.filter((a) =>
+        a.tags?.some((tag) => tag.toLowerCase() === categoryFilter.toLowerCase()),
+      )
     : articles;
 
   return (
