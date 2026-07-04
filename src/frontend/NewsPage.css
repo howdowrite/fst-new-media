@@ -143,8 +143,13 @@
 }
 
 @keyframes notifFadeOut {
-  0%, 60% { opacity: 1; }
-  100% { opacity: 0; }
+  0%,
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 .site-header__auth .auth-btn {
@@ -193,6 +198,10 @@
   display: flex;
   flex-direction: column;
   gap: 1.778rem;
+  max-width: 100%;
+  margin: 0;
+  border: none;
+  box-shadow: none;
 }
 
 /* ── Featured article cards ── */
@@ -272,7 +281,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   margin: 0 0 1.333rem;
-  color: var(--text);
+  color: var(--accent);
 }
 
 .latest-section__list {

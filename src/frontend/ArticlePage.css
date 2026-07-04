@@ -52,7 +52,7 @@
 }
 
 .article-detail__author a {
-  color: var(--accent);
+  color: var(--subtext);
   text-decoration: none;
 }
 
@@ -106,6 +106,7 @@
 .comments {
   border-top: 1px solid var(--border);
   padding-top: 1.778rem;
+  max-width: 100%;
 }
 
 .comments__title {
