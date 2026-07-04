@@ -14,14 +14,29 @@ import "../NewsPage.css";
 
 export function TopNav() {
   const [searchParams] = useSearchParams();
+  const [isOpen, setIsOpen] = useState(false);
   const activeCategory = searchParams.get("category") || "";
+
+  const handleLinkClick = () => setIsOpen(false);
 
   return (
     <nav className="top-nav" aria-label="Categories">
-      <ul className="top-nav__list">
+      <button
+        className={`top-nav__toggle ${isOpen ? "top-nav__toggle--open" : ""}`}
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        aria-label="Toggle navigation menu"
+      >
+        <span className="hamburger-line"></span>
+        <span className="hamburger-line"></span>
+        <span className="hamburger-line"></span>
+      </button>
+
+      <ul className={`top-nav__list ${isOpen ? "top-nav__list--open" : ""}`}>
         <li>
           <Link
             to="/"
+            onClick={handleLinkClick}
             className={`top-nav__link ${!activeCategory ? "top-nav__link--active" : ""}`}
           >
             ALL
@@ -31,6 +46,7 @@ export function TopNav() {
           <li key={link}>
             <Link
               to={`/?category=${encodeURIComponent(link)}`}
+              onClick={handleLinkClick}
               className={`top-nav__link ${activeCategory === link ? "top-nav__link--active" : ""}`}
             >
               {link}
@@ -78,7 +94,10 @@ export function SiteHeader() {
   return (
     <>
       {logoutMsg && (
-        <div className="notification-banner notification-banner--success" role="status">
+        <div
+          className="notification-banner notification-banner--success"
+          role="status"
+        >
           <p>{logoutMsg}</p>
         </div>
       )}

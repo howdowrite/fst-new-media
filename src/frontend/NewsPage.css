@@ -12,7 +12,8 @@
 .top-nav {
   margin-block: 0.889rem;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
 }
 
@@ -44,6 +45,28 @@
 
 .top-nav__link--active {
   font-weight: 700;
+}
+
+.top-nav__toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 1.5rem;
+  height: 1.1rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1002;
+}
+
+.hamburger-line {
+  width: 100%;
+  height: 2px;
+  background-color: var(--text);
+  transition:
+    transform 0.3s,
+    opacity 0.3s;
 }
 
 /* ── White container ── */
@@ -464,5 +487,76 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.222rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .top-nav {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-self: flex-end;
+    width: auto;
+    margin-inline-start: auto;
+    margin-block: 0.5rem 1rem;
+    position: relative;
+  }
+
+  .top-nav__toggle {
+    display: flex;
+  }
+
+  .top-nav__toggle--open .hamburger-line:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .top-nav__toggle--open .hamburger-line:nth-child(2) {
+    opacity: 0;
+  }
+  .top-nav__toggle--open .hamburger-line:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  .top-nav__list {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 1.5rem;
+    right: 0;
+    left: auto;
+    width: 12.222rem;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 0.889rem;
+    padding: 1rem;
+    gap: 1.111rem;
+    box-shadow: var(--shadow);
+    z-index: 1000;
+
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    transition:
+      transform 0.2s ease,
+      opacity 0.2s ease;
+
+    overflow-x: visible;
+    flex-wrap: nowrap;
+  }
+
+  .top-nav__list li {
+    width: 100%;
+    text-align: left;
+  }
+
+  .top-nav__link {
+    display: block;
+    padding-block: 0.2rem;
+    font-size: 0.889rem;
+  }
+
+  .top-nav__list--open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
   }
 }
