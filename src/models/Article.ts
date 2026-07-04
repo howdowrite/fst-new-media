@@ -27,6 +27,37 @@ export const transform = (id: string, data:Omit<ArticleProps, "id">):ArticleProp
   }
 }
 
+export const validateArticleUpdate = (data:Partial<ArticleProps>): Partial<ArticleProps> => {
+  const update: Partial<ArticleProps> = {};
+
+  if (data.title !== undefined) {
+    if (!data.title.trim()) throw new Error(`Please enter a title for your article.`);
+    if (data.title.length >= TITLE_MAX) throw new Error(`Title must be ${TITLE_MAX} characters or fewer.`);
+    update.title = data.title;
+  }
+
+  if (data.content !== undefined) {
+    if (!data.content.trim()) throw new Error(`Please enter the article content.`);
+    if (data.content.length >= CONTENT_MAX) throw new Error(`Content must be ${CONTENT_MAX} characters or fewer.`);
+    update.content = data.content;
+  }
+
+  if (data.tags !== undefined) {
+    update.tags = data.tags;
+  }
+
+  if (data.status !== undefined) {
+    update.status = data.status;
+  }
+
+  if (data.imageURL !== undefined) {
+    update.imageURL = data.imageURL;
+  }
+
+  update.modifiedAt = serverTimestamp();
+  return update;
+}
+
 export const validateArticle = (data:Partial<ArticleProps>): Partial<ArticleProps> => {
   if(!data.creatorId) throw new Error(`Creator reference is missing.`);
   if(!data.creatorDisplayName) throw new Error(`Your display name is required.`);

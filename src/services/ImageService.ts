@@ -18,6 +18,7 @@ export const compressImage = async(file: File) => {
 }
 
 const uploadToCloudinary = async (file: File): Promise<string> =>  {
+  if (!CLOUD_NAME || !UPLOAD_PRESET) throw new Error("Cloudinary config missing. Check VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET environment variables.");
   const formData = new FormData();
 
   formData.append("file", file);
