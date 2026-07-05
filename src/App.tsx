@@ -10,33 +10,7 @@ import ProtectedRoute from "./frontend/components/ProtectedRoute";
 import NotFound from "./frontend/components/NotFound";
 import ConnectionBanner from "./frontend/components/ConnectionBanner";
 import "./App.css";
-import { Link, Routes, Route } from "react-router-dom";
-
-function AdminHome() {
-  return (
-    <>
-      <h1>BACKEND TESTING</h1>
-      <p>defaults: email: john.doe@example.com; password: 1234567890</p>
-      <ul>
-        <li>
-          <Link to="/add-user">Add User</Link>
-        </li>
-        <li>
-          <Link to="/create-post">Create Post</Link>
-        </li>
-        <li>
-          <Link to="/login">Login</Link>
-        </li>
-        <li>
-          <Link to="/dashboard">Dashboard</Link>
-        </li>
-        <li>
-          <Link to="/drafts">Drafts</Link>
-        </li>
-      </ul>
-    </>
-  );
-}
+import { Routes, Route } from "react-router-dom";
 
 function App() {
   return (
@@ -45,7 +19,6 @@ function App() {
       <Routes>
         <Route path="/" element={<NewsPage />} />
         <Route path="/article/:id" element={<ArticlePage />} />
-        <Route path="/admin" element={<AdminHome />} />
         <Route path="/add-user" element={<AddUser />} />
         <Route path="/login" element={<Login />} />
         <Route path="/create-post" element={<ProtectedRoute allowedRoles={["ADMIN", "JOURNALIST"]}><CreatePosts /></ProtectedRoute>} />
