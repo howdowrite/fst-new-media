@@ -108,6 +108,7 @@ function AddUser() {
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete="email"
                     required
+                    maxLength={254}
                     disabled={submitting}
                   />
                   <p className="auth-field__hint">

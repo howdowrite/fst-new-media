@@ -23,6 +23,7 @@ export const transform = (id: string, data:Omit<UserProps, "id">):UserProps => {
 
 export const createUser = (data:Partial<UserProps>): Partial<UserProps> => {
   if(!data.email?.trim()) throw new Error(`Please enter a valid email address.`);
+  if(data.email.trim().length > 254) throw new Error(`Email must not exceed 254 characters.`);
 
   return{
     email: data.email,

@@ -110,6 +110,7 @@ function Login() {
                       onChange={(e) => setEmail(e.target.value)}
                       autoComplete="email"
                       required
+                      maxLength={254}
                       disabled={currentUser ? true : false}
                     />
                   </div>
