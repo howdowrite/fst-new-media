@@ -13,7 +13,10 @@ import "./css/Login.css";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [message, setMessage] = useState<{
+    text: string;
+    type: "success" | "error";
+  } | null>(null);
   const [currentUser, setCurrentUser] = useState("");
   const navigate = useNavigate();
 
@@ -49,7 +52,7 @@ function Login() {
       <div className="auth-page__image">
         <div className="auth-page__brand-wrap">
           <div className="auth-page__brand">
-            <h2 className="auth-page__brand-title">WebsiteName</h2>
+            <h2 className="auth-page__brand-title">The Culture Feed</h2>
             <p className="auth-page__brand-tagline">Stories Worth Sharing</p>
             <p className="auth-page__brand-copy">
               Write, edit, and publish your work from one place.
@@ -132,13 +135,16 @@ function Login() {
 
               {!currentUser && (
                 <p className="auth-form__footer">
-                  Don&apos;t have an account? <Link to="/add-user">Register</Link>
+                  Don&apos;t have an account?{" "}
+                  <Link to="/add-user">Register</Link>
                 </p>
               )}
             </div>
 
             <div className="auth-form__guidelines">
-              <p className="auth-form__guidelines-title">Registration Requirements</p>
+              <p className="auth-form__guidelines-title">
+                Registration Requirements
+              </p>
               <div className="auth-form__guidelines-section">
                 <p className="auth-form__guidelines-heading">Display Name</p>
                 <ul className="auth-form__guidelines-list">
@@ -148,7 +154,9 @@ function Login() {
               <div className="auth-form__guidelines-section">
                 <p className="auth-form__guidelines-heading">Email</p>
                 <ul className="auth-form__guidelines-list">
-                  <li>Must be a valid email with a domain (e.g., name@domain.com)</li>
+                  <li>
+                    Must be a valid email with a domain (e.g., name@domain.com)
+                  </li>
                   <li>Max 254 characters</li>
                 </ul>
               </div>
