@@ -110,35 +110,29 @@ function JournalistDashboard() {
               <span className="nav-item__icon">
                 <LayoutDashboard strokeWidth={1.5} />
               </span>
-              <span className="nav-item__text">{"Dashboard"}</span>
+              <span className="nav-item__text">Dashboard</span>
             </div>
 
-            <div className="nav-item">
+            <Link to="/" className="nav-item">
               <span className="nav-item__icon">
                 <House color="#1E1E1E" strokeWidth={1.25} />
               </span>
-              <span className="nav-item__text">
-                <Link to="/">Feed</Link>
-              </span>
-            </div>
+              <span className="nav-item__text">Feed</span>
+            </Link>
 
-            <div className="nav-item">
+            <Link to="/create-post" className="nav-item">
               <span className="nav-item__icon">
                 <Pencil color="#1E1E1E" strokeWidth={1.25} />
               </span>
-              <span className="nav-item__text">
-                <Link to="/create-post">Create</Link>
-              </span>
-            </div>
+              <span className="nav-item__text">Create</span>
+            </Link>
 
-            <div className="nav-item">
+            <Link to="/drafts" className="nav-item">
               <span className="nav-item__icon">
                 <SquarePen color="#1E1E1E" strokeWidth={1.25} />
               </span>
-              <span className="nav-item__text">
-                <Link to="/drafts">Drafts</Link>
-              </span>
-            </div>
+              <span className="nav-item__text">Drafts</span>
+            </Link>
           </nav>
         </aside>
 

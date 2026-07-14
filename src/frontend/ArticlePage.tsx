@@ -5,10 +5,7 @@ import FormMessage from "./components/FormMessage";
 import { LatestNewsSidebar, NewsPageShell } from "./components/NewsLayout";
 import { getPostById } from "../services/ArticleService";
 import { getCommentsByArticleId, addComment } from "../services/CommentService";
-import {
-  getCurrentUser,
-  doOnAuthStateChange,
-} from "../services/AuthService";
+import { getCurrentUser, doOnAuthStateChange } from "../services/AuthService";
 import { getUserById } from "../services/UserService";
 import type { ArticleProps } from "../models/Article";
 import type { CommentProps } from "../models/Comment";
@@ -62,7 +59,10 @@ export default function ArticlePage() {
   const [currentUserId, setCurrentUserId] = useState("");
   const [currentDisplayName, setCurrentDisplayName] = useState("");
   const [commentInput, setCommentInput] = useState("");
-  const [commentMsg, setCommentMsg] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [commentMsg, setCommentMsg] = useState<{
+    text: string;
+    type: "success" | "error";
+  } | null>(null);
   const [submittingComment, setSubmittingComment] = useState(false);
 
   useEffect(() => {
@@ -94,7 +94,13 @@ export default function ArticlePage() {
 
         try {
           const stored = localStorage.getItem("recentlyViewed");
-          let recent: Array<{ id: string; title: string; content: string; creatorDisplayName: string; imageURL?: string }> = stored ? JSON.parse(stored) : [];
+          let recent: Array<{
+            id: string;
+            title: string;
+            content: string;
+            creatorDisplayName: string;
+            imageURL?: string;
+          }> = stored ? JSON.parse(stored) : [];
           recent = recent.filter((item) => item.id !== id);
           recent.unshift({
             id: articleData.id,
@@ -128,13 +134,14 @@ export default function ArticlePage() {
     fetch();
   }, [id]);
 
-  const handleCommentSubmit = async (
-    e: React.FormEvent<HTMLFormElement>,
-  ) => {
+  const handleCommentSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setCommentMsg(null);
     if (!commentInput.trim() || !currentUserId || !id) {
-      setCommentMsg({ text: "You must be logged in to comment.", type: "error" });
+      setCommentMsg({
+        text: "You must be logged in to comment.",
+        type: "error",
+      });
       return;
     }
     setSubmittingComment(true);
@@ -157,7 +164,13 @@ export default function ArticlePage() {
       );
       setComments(mapped);
     } catch (e) {
-      setCommentMsg({ text: e instanceof Error ? e.message : "Failed to post comment. Please try again.", type: "error" });
+      setCommentMsg({
+        text:
+          e instanceof Error
+            ? e.message
+            : "Failed to post comment. Please try again.",
+        type: "error",
+      });
     } finally {
       setSubmittingComment(false);
     }
@@ -190,7 +203,7 @@ export default function ArticlePage() {
               <footer className="article-detail__meta">
                 <time>{formatDate(article.createdAt)}</time>
                 <span className="article-detail__author">
-                  <Link to="#">{article.creatorDisplayName}</Link>
+                  {article.creatorDisplayName}
                 </span>
               </footer>
             </div>
@@ -217,26 +230,20 @@ export default function ArticlePage() {
                 comments
                   .filter((c) => !c.replyTargetId || c.replyTargetId === id)
                   .map((comment) => (
-                    <CommentItem
-                      key={comment.id}
-                      comment={comment}
-                    />
+                    <CommentItem key={comment.id} comment={comment} />
                   ))
               )}
             </div>
-            {commentMsg && <FormMessage text={commentMsg.text} type={commentMsg.type} />}
+            {commentMsg && (
+              <FormMessage text={commentMsg.text} type={commentMsg.type} />
+            )}
             <form className="comment-input" onSubmit={handleCommentSubmit}>
-              <InitialAvatar
-                name={currentDisplayName || "?"}
-                size="sm"
-              />
+              <InitialAvatar name={currentDisplayName || "?"} size="sm" />
               <input
                 type="text"
                 className="comment-input__field"
                 placeholder={
-                  currentUserId
-                    ? "Write a comment..."
-                    : "Log in to comment"
+                  currentUserId ? "Write a comment..." : "Log in to comment"
                 }
                 aria-label="Write a comment"
                 value={commentInput}

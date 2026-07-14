@@ -132,6 +132,7 @@ function CreatePosts() {
           isMobileMenuOpen ? "dashboard-container--mobile-open" : ""
         }`}
       >
+        {/* SIDEBAR PANEL */}
         <aside className="dashboard-panel dashboard-panel--sidebar">
           <div className="sidebar__header">
             <button
@@ -147,23 +148,19 @@ function CreatePosts() {
           </div>
 
           <nav className="sidebar__nav">
-            <div className="nav-item">
+            <Link to="/dashboard" className="nav-item">
               <span className="nav-item__icon">
                 <LayoutDashboard color="#1E1E1E" strokeWidth={1.25} />
               </span>
-              <span className="nav-item__text">
-                <Link to="/dashboard">Dashboard</Link>
-              </span>
-            </div>
+              <span className="nav-item__text">Dashboard</span>
+            </Link>
 
-            <div className="nav-item">
+            <Link to="/" className="nav-item">
               <span className="nav-item__icon">
                 <House color="#1E1E1E" strokeWidth={1.25} />
               </span>
-              <span className="nav-item__text">
-                <Link to="/">Feed</Link>
-              </span>
-            </div>
+              <span className="nav-item__text">Feed</span>
+            </Link>
 
             <div className="nav-item nav-item--active">
               <span className="nav-item__icon">
@@ -172,14 +169,12 @@ function CreatePosts() {
               <span className="nav-item__text">Create</span>
             </div>
 
-            <div className="nav-item">
+            <Link to="/drafts" className="nav-item">
               <span className="nav-item__icon">
                 <SquarePen color="#1E1E1E" strokeWidth={1.25} />
               </span>
-              <span className="nav-item__text">
-                <Link to="/drafts">Drafts</Link>
-              </span>
-            </div>
+              <span className="nav-item__text">Drafts</span>
+            </Link>
           </nav>
         </aside>
 
@@ -278,10 +273,7 @@ function CreatePosts() {
               </select>
             </div>
 
-            <div
-              className="form-actions-wrapper"
-              style={{ display: "flex", gap: "16px", marginTop: "32px" }}
-            >
+            <div className="form-actions-wrapper">
               <button
                 type="button"
                 className="action-btn action-btn--publish"

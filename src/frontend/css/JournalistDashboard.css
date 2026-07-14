@@ -6,14 +6,20 @@
 }
 
 .dashboard-header-block {
-  display: block;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  box-sizing: border-box;
+  position: relative;
 }
 
 .header-text {
   font-family: var(--heading);
-  line-height: 2.5;
+  line-height: 1.2;
   font-size: 40px;
   margin: 0;
+  text-align: center;
 }
 
 .hamburger-trigger {
@@ -25,6 +31,11 @@
   padding: 8px;
   align-items: center;
   justify-content: center;
+  margin-left: auto !important;
+
+  position: absolute !important;
+  right: 20px !important;
+  top: 24px !important;
 }
 
 .dashboard-container {
@@ -62,7 +73,7 @@
 
 .sidebar__toggle {
   align-self: flex-end;
-  background: #f0f2f5;
+  background: #000000;
   border: none;
   border-radius: 6px;
   padding: 6px 12px;
@@ -90,6 +101,9 @@
   border-radius: 8px;
   cursor: pointer;
   white-space: nowrap;
+  text-decoration: none;
+  width: 100%;
+  box-sizing: border-box;
   background: transparent;
   color: #1e1e1e;
   transition:
@@ -272,6 +286,22 @@
   color: #cfc284;
 }
 
+.form-actions-wrapper {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-top: 32px !important;
+  width: 100% !important;
+}
+
+.form-actions-wrapper .action-btn {
+  flex: none !important;
+  width: auto !important;
+  margin: 0 !important;
+}
+
 .action-btn {
   display: inline-block;
   padding: 10px 24px;
@@ -346,21 +376,35 @@
 
 @media (max-width: 1024px) {
   .dashboard-header-block {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 0 0 12px 0 !important;
     border-bottom: 1px solid #eef0f2;
     padding-bottom: 8px;
     margin-bottom: 8px;
+    width: 100% !important;
+    position: relative;
   }
 
   .header-text {
+    margin: 0;
     font-size: 30px;
-    line-height: 1.8;
+    line-height: 1.2 !important;
+    text-align: left;
+    padding-left: 20px;
   }
 
   .hamburger-trigger {
-    display: flex;
+    display: flex !important;
+    position: absolute !important;
+    right: 0 !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    background: none;
+    border: none;
+    padding: 8px !important;
+    margin: 0 !important;
   }
 
   .dashboard-container {
@@ -368,6 +412,7 @@
     flex-direction: column;
     position: relative;
     padding-top: 0;
+    padding: 0 24px !important;
   }
 
   .dashboard-panel--sidebar {
